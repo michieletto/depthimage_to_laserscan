@@ -34,6 +34,7 @@
 #include <functional>
 #include <stdexcept>
 #include <string>
+#include <chrono>
 
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_components/register_node_macro.hpp>
@@ -43,6 +44,8 @@
 #include <sensor_msgs/msg/laser_scan.hpp>
 
 #include <depthimage_to_laserscan/DepthImageToLaserScanROS.hpp>
+
+using namespace std::chrono_literals;
 
 namespace depthimage_to_laserscan{
 
@@ -59,17 +62,15 @@ DepthImageToLaserScanROS::DepthImageToLaserScanROS(const rclcpp::NodeOptions & o
 
   scan_pub_ = this->create_publisher<sensor_msgs::msg::LaserScan>("scan", qos);
 
-  float scan_time = this->declare_parameter("scan_time", 0.033);
+  this->declare_parameter("scan_time", 0.033);
+  this->declare_parameter("range_min", 0.45);
+  this->declare_parameter("range_max", 10.0);
+  this->declare_parameter("scan_height", 1);
+  this->declare_parameter("output_frame", "camera_depth_frame");
 
-  float range_min = this->declare_parameter("range_min", 0.45);
-  float range_max  = this->declare_parameter("range_max", 10.0);
+  timer_ = this->create_wall_timer(1000ms, std::bind(&DepthImageToLaserScanROS::updateParams, this));
 
-  int scan_height = this->declare_parameter("scan_height", 1);
-
-  std::string output_frame = this->declare_parameter("output_frame", "camera_depth_frame");
-
-  dtl_ = std::make_unique<depthimage_to_laserscan::DepthImageToLaserScan>(scan_time, range_min,
-                                                                          range_max, scan_height, output_frame);
+  dtl_ = std::make_unique<depthimage_to_laserscan::DepthImageToLaserScan>(0.033, 0.45, 10.0, 1, "camera_depth_frame");
 }
 
 DepthImageToLaserScanROS::~DepthImageToLaserScanROS(){
@@ -93,6 +94,23 @@ void DepthImageToLaserScanROS::depthCb(const sensor_msgs::msg::Image::SharedPtr 
     RCLCPP_ERROR(get_logger(), "Could not convert depth image to laserscan: %s", e.what());
   }
 }
+
+void DepthImageToLaserScanROS::updateParams() {
+  float scan_time = 0.0f;
+  float range_min = 0.0f;
+  float range_max = 0.0f;
+  int scan_height = 0;
+  std::string output_frame = "test";
+
+  this->get_parameter("scan_time", scan_time);
+  this->get_parameter("range_min", range_min);
+  this->get_parameter("range_max", range_max);
+  this->get_parameter("scan_height", scan_height);
+  this->get_parameter("output_frame", output_frame);
+  
+  dtl_->update_parameters(scan_time, range_min, range_max, scan_height, output_frame);
+}
+
 }  // namespace depthimage_to_laserscan
 
 RCLCPP_COMPONENTS_REGISTER_NODE(depthimage_to_laserscan::DepthImageToLaserScanROS)

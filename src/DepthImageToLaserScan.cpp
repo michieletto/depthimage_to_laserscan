@@ -38,6 +38,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <iostream>
 
 #include <opencv2/core/core.hpp>
 #include <sensor_msgs/image_encodings.hpp>
@@ -52,6 +53,26 @@ DepthImageToLaserScan::DepthImageToLaserScan(float scan_time, float range_min, f
 }
 
 DepthImageToLaserScan::~DepthImageToLaserScan(){
+}
+
+void DepthImageToLaserScan::update_parameters(float scan_time, float range_min, float range_max, int scan_height, const std::string& frame_id) {
+  if (scan_time_ != scan_time) {
+    scan_time_ = scan_time;
+    std::cout << "Scan time changed" << std::endl;
+  }
+  if (range_min_ != range_min) {
+    range_min_ = range_min;
+    std::cout << "Range min changed" << std::endl;
+  }
+  if(range_max_ != range_max) {
+    range_max_ = range_max;
+    std::cout << "Range max changed" << std::endl;
+  }
+  if(scan_height_ != scan_height) {
+    scan_height_ = scan_height;
+    std::cout << "Scan height changed" << std::endl;
+  }
+  output_frame_id_ = frame_id;
 }
 
 double DepthImageToLaserScan::magnitude_of_ray(const cv::Point3d& ray) const{

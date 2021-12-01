@@ -37,6 +37,7 @@
 #include <memory>
 
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp/timer.hpp>
 #include <sensor_msgs/msg/camera_info.hpp>
 #include <sensor_msgs/msg/image.hpp>
 #include <sensor_msgs/msg/laser_scan.hpp>
@@ -66,7 +67,11 @@ namespace depthimage_to_laserscan
 
     void infoCb(sensor_msgs::msg::CameraInfo::SharedPtr info);
 
+    void updateParams();
+
     sensor_msgs::msg::CameraInfo::SharedPtr cam_info_;
+
+    rclcpp::TimerBase::SharedPtr timer_;
 
     rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr cam_info_sub_;
     rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr depth_image_sub_;

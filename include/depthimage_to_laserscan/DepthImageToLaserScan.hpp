@@ -71,6 +71,8 @@ namespace depthimage_to_laserscan
     explicit DepthImageToLaserScan(float scan_time, float range_min, float range_max, int scan_height, const std::string& frame_id);
     ~DepthImageToLaserScan();
 
+    void update_parameters(float scan_time, float range_min, float range_max, int scan_height, const std::string& frame_id);
+
     /**
      * Converts the information in a depth image (sensor_msgs::Image) to a sensor_msgs::LaserScan.
      *
@@ -171,11 +173,11 @@ namespace depthimage_to_laserscan
             r = std::sqrt(std::pow(x, 2.0) + std::pow(z, 2.0));
           }
 
-	  // Determine if this point should be used.
-	  if(use_point(r, scan_msg->ranges[index], scan_msg->range_min, scan_msg->range_max)){
-	    scan_msg->ranges[index] = r;
-	  }
-	}
+          // Determine if this point should be used.
+          if(use_point(r, scan_msg->ranges[index], scan_msg->range_min, scan_msg->range_max)){
+            scan_msg->ranges[index] = r;
+          }
+        }
       }
     }
 
